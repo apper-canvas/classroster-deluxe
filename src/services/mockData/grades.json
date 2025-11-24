@@ -1,0 +1,222 @@
+[
+  {
+    "Id": 1,
+    "studentId": "1",
+    "subject": "Mathematics",
+    "marks": 88,
+    "maxMarks": 100,
+    "percentage": 88,
+    "gradeLetter": "B+",
+    "term": "Term 1",
+    "date": "2024-01-15T10:00:00.000Z"
+  },
+  {
+    "Id": 2,
+    "studentId": "1",
+    "subject": "English",
+    "marks": 92,
+    "maxMarks": 100,
+    "percentage": 92,
+    "gradeLetter": "A",
+    "term": "Term 1",
+    "date": "2024-01-20T10:00:00.000Z"
+  },
+  {
+    "Id": 3,
+    "studentId": "1",
+    "subject": "Science",
+    "marks": 85,
+    "maxMarks": 100,
+    "percentage": 85,
+    "gradeLetter": "A",
+    "term": "Term 1",
+    "date": "2024-01-25T10:00:00.000Z"
+  },
+  {
+    "Id": 4,
+    "studentId": "2",
+    "subject": "Mathematics",
+    "marks": 78,
+    "maxMarks": 100,
+    "percentage": 78,
+    "gradeLetter": "B",
+    "term": "Term 1",
+    "date": "2024-01-15T10:00:00.000Z"
+  },
+  {
+    "Id": 5,
+    "studentId": "2",
+    "subject": "English",
+    "marks": 95,
+    "maxMarks": 100,
+    "percentage": 95,
+    "gradeLetter": "A+",
+    "term": "Term 1",
+    "date": "2024-01-20T10:00:00.000Z"
+  },
+  {
+    "Id": 6,
+    "studentId": "2",
+    "subject": "Science",
+    "marks": 90,
+    "maxMarks": 100,
+    "percentage": 90,
+    "gradeLetter": "A+",
+    "term": "Term 1",
+    "date": "2024-01-25T10:00:00.000Z"
+  },
+  {
+    "Id": 7,
+    "studentId": "3",
+    "subject": "Mathematics",
+    "marks": 82,
+    "maxMarks": 100,
+    "percentage": 82,
+    "gradeLetter": "B+",
+    "term": "Term 1",
+    "date": "2024-01-15T10:00:00.000Z"
+  },
+  {
+    "Id": 8,
+    "studentId": "3",
+    "subject": "English",
+    "marks": 87,
+    "maxMarks": 100,
+    "percentage": 87,
+    "gradeLetter": "B+",
+    "term": "Term 1",
+    "date": "2024-01-20T10:00:00.000Z"
+  },
+  {
+    "Id": 9,
+    "studentId": "3",
+    "subject": "Science",
+    "marks": 91,
+    "maxMarks": 100,
+    "percentage": 91,
+    "gradeLetter": "A+",
+    "term": "Term 1",
+    "date": "2024-01-25T10:00:00.000Z"
+  },
+  {
+    "Id": 10,
+    "studentId": "4",
+    "subject": "Mathematics",
+    "marks": 94,
+    "maxMarks": 100,
+    "percentage": 94,
+    "gradeLetter": "A+",
+    "term": "Term 1",
+    "date": "2024-01-15T10:00:00.000Z"
+  },
+  {
+    "Id": 11,
+    "studentId": "4",
+    "subject": "English",
+    "marks": 89,
+    "maxMarks": 100,
+    "percentage": 89,
+    "gradeLetter": "B+",
+    "term": "Term 1",
+    "date": "2024-01-20T10:00:00.000Z"
+  },
+  {
+    "Id": 12,
+    "studentId": "4",
+    "subject": "Science",
+    "marks": 96,
+    "maxMarks": 100,
+    "percentage": 96,
+    "gradeLetter": "A+",
+    "term": "Term 1",
+    "date": "2024-01-25T10:00:00.000Z"
+  },
+  {
+    "Id": 13,
+    "studentId": "5",
+    "subject": "Mathematics",
+    "marks": 72,
+    "maxMarks": 100,
+    "percentage": 72,
+    "gradeLetter": "C+",
+    "term": "Term 1",
+    "date": "2024-01-15T10:00:00.000Z"
+  },
+  {
+    "Id": 14,
+    "studentId": "5",
+    "subject": "English",
+    "marks": 84,
+    "maxMarks": 100,
+    "percentage": 84,
+    "gradeLetter": "B+",
+    "term": "Term 1",
+    "date": "2024-01-20T10:00:00.000Z"
+  },
+  {
+    "Id": 15,
+    "studentId": "5",
+    "subject": "Science",
+    "marks": 76,
+    "maxMarks": 100,
+    "percentage": 76,
+    "gradeLetter": "B",
+    "term": "Term 1",
+    "date": "2024-01-25T10:00:00.000Z"
+  },
+  {
+    "Id": 16,
+    "studentId": "6",
+    "subject": "Mathematics",
+    "marks": 86,
+    "maxMarks": 100,
+    "percentage": 86,
+    "gradeLetter": "A",
+    "term": "Term 1",
+    "date": "2024-01-15T10:00:00.000Z"
+  },
+  {
+    "Id": 17,
+    "studentId": "6",
+    "subject": "English",
+    "marks": 91,
+    "maxMarks": 100,
+    "percentage": 91,
+    "gradeLetter": "A+",
+    "term": "Term 1",
+    "date": "2024-01-20T10:00:00.000Z"
+  },
+  {
+    "Id": 18,
+    "studentId": "6",
+    "subject": "Science",
+    "marks": 88,
+    "maxMarks": 100,
+    "percentage": 88,
+    "gradeLetter": "B+",
+    "term": "Term 1",
+    "date": "2024-01-25T10:00:00.000Z"
+  },
+  {
+    "Id": 19,
+    "studentId": "8",
+    "subject": "Mathematics",
+    "marks": 79,
+    "maxMarks": 100,
+    "percentage": 79,
+    "gradeLetter": "B",
+    "term": "Term 1",
+    "date": "2024-01-15T10:00:00.000Z"
+  },
+  {
+    "Id": 20,
+    "studentId": "8",
+    "subject": "English",
+    "marks": 83,
+    "maxMarks": 100,
+    "percentage": 83,
+    "gradeLetter": "B+",
+    "term": "Term 1",
+    "date": "2024-01-20T10:00:00.000Z"
+  }
+]
