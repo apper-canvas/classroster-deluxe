@@ -59,7 +59,7 @@ if (mode === "view") {
         // Student data is already passed via props
       }
     } else {
-      // Reset form for new student
+// Reset form for new student
       setFormData({
         firstName_c: "",
         lastName_c: "",
@@ -70,7 +70,8 @@ if (mode === "view") {
         address_c: "",
         grade_c: "",
         section_c: "",
-        status_c: "Active"
+        status_c: "Active",
+        Tags: ""
       });
     }
     setActiveTab("profile");
