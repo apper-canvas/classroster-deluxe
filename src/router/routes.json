@@ -38,12 +38,25 @@
       "redirectOnDeny": "/login"
     }
   },
-  "/attendance": {
+"/attendance": {
     "allow": {
       "when": {
         "conditions": [
           {
             "label": "User must be logged in to view attendance",
+            "rule": "authenticated"
+          }
+        ]
+      },
+      "redirectOnDeny": "/login"
+    }
+  },
+  "/assignments": {
+    "allow": {
+      "when": {
+        "conditions": [
+          {
+            "label": "User must be logged in to view assignments",
             "rule": "authenticated"
           }
         ]
