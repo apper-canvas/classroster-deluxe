@@ -9,9 +9,9 @@ import ApperIcon from "@/components/ApperIcon";
 import Loading from "@/components/ui/Loading";
 import ErrorView from "@/components/ui/ErrorView";
 import Empty from "@/components/ui/Empty";
-import studentService from "@/services/api/studentService";
-import gradeService from "@/services/api/gradeService";
-import attendanceService from "@/services/api/attendanceService";
+import { studentService } from "@/services/api/studentService";
+import { gradeService } from "@/services/api/gradeService";
+import { attendanceService } from "@/services/api/attendanceService";
 import { format, isToday, subDays } from "date-fns";
 
 const Dashboard = () => {
@@ -33,18 +33,28 @@ const Dashboard = () => {
       setLoading(true);
       setError("");
       
-      const [studentsData, gradesData, attendanceData] = await Promise.all([
-        studentService.getAll(),
-        gradeService.getAll(),
-        attendanceService.getAll()
+const [studentsData, gradesData, attendanceData] = await Promise.all([
+        studentService.getAll().catch(err => {
+          console.error("Error loading students:", err);
+          return [];
+        }),
+        gradeService.getAll().catch(err => {
+          console.error("Error loading grades:", err);
+          return [];
+        }),
+        attendanceService.getAll().catch(err => {
+          console.error("Error loading attendance:", err);
+          return [];
+        })
       ]);
       
       setData({
-        students: studentsData,
-        grades: gradesData,
-        attendance: attendanceData
+        students: studentsData || [],
+        grades: gradesData || [],
+        attendance: attendanceData || []
       });
     } catch (err) {
+      console.error("Dashboard data loading error:", err);
       setError("Failed to load dashboard data");
       toast.error("Failed to load dashboard data");
     } finally {
@@ -52,19 +62,29 @@ const Dashboard = () => {
     }
   };
 
-  const calculateStats = () => {
-const totalStudents = data.students.length;
-    const activeStudents = data.students.filter(s => (s.status_c || s.status) === "Active").length;
+const calculateStats = () => {
+    const totalStudents = data.students?.length || 0;
+    const activeStudents = data.students?.filter(s => (s.status_c || s.status) === "Active")?.length || 0;
     
     // Calculate average grade
-    const averageGrade = data.grades.length > 0 
-      ? Math.round(data.grades.reduce((sum, grade) => sum + (grade.percentage_c || grade.percentage), 0) / data.grades.length)
+    const averageGrade = data.grades?.length > 0 
+      ? Math.round(data.grades.reduce((sum, grade) => {
+          const percentage = grade.percentage_c || grade.percentage || 0;
+          return sum + percentage;
+        }, 0) / data.grades.length)
       : 0;
     
     // Calculate today's attendance rate
-    const todayAttendance = data.attendance.filter(a => isToday(new Date(a.date_c || a.date)));
+    const todayAttendance = data.attendance?.filter(a => {
+      try {
+        return isToday(new Date(a.date_c || a.date));
+      } catch {
+        return false;
+      }
+    }) || [];
+    
     const attendanceRate = todayAttendance.length > 0
-      ? Math.round((todayAttendance.filter(a => a.status === "Present").length / todayAttendance.length) * 100)
+      ? Math.round((todayAttendance.filter(a => (a.status_c || a.status) === "Present").length / todayAttendance.length) * 100)
       : 0;
 
     return {
@@ -75,38 +95,71 @@ const totalStudents = data.students.length;
     };
   };
 
-  const getRecentActivity = () => {
-const recentGrades = data.grades
-      .sort((a, b) => new Date(b.date_c || b.date) - new Date(a.date_c || a.date))
+const getRecentActivity = () => {
+    const recentGrades = (data.grades || [])
+      .sort((a, b) => {
+        try {
+          return new Date(b.date_c || b.date) - new Date(a.date_c || a.date);
+        } catch {
+          return 0;
+        }
+      })
       .slice(0, 5)
       .map(grade => {
-        const student = data.students.find(s => (s.Id || s.id) === (grade.studentId_c?.Id || grade.studentId_c || grade.studentId));
+        const student = data.students?.find(s => (s.Id || s.id) === (grade.studentId_c?.Id || grade.studentId_c || grade.studentId));
+        const percentage = grade.percentage_c || grade.percentage || 0;
+        const subject = grade.subject_c || grade.subject || "Unknown Subject";
         return {
-          id: grade.id,
+          id: grade.Id || grade.id,
           type: "grade",
-          message: `${student?.firstName} ${student?.lastName} received ${grade.percentage}% in ${grade.subject}`,
-          date: grade.date,
-          status: grade.percentage >= 80 ? "success" : grade.percentage >= 60 ? "warning" : "error"
+          message: `${student?.firstName_c || student?.firstName || "Unknown"} ${student?.lastName_c || student?.lastName || "Student"} received ${percentage}% in ${subject}`,
+          date: grade.date_c || grade.date,
+          status: percentage >= 80 ? "success" : percentage >= 60 ? "warning" : "error"
         };
       });
 
-const recentAttendance = data.attendance
-      .filter(a => new Date(a.date_c || a.date) >= subDays(new Date(), 7))
-      .sort((a, b) => new Date(b.date_c || b.date) - new Date(a.date_c || a.date))
+    const recentAttendance = (data.attendance || [])
+      .filter(a => {
+        try {
+          return new Date(a.date_c || a.date) >= subDays(new Date(), 7);
+        } catch {
+          return false;
+        }
+      })
+      .sort((a, b) => {
+        try {
+          return new Date(b.date_c || b.date) - new Date(a.date_c || a.date);
+        } catch {
+          return 0;
+        }
+      })
       .slice(0, 3)
       .map(attendance => {
-        const student = data.students.find(s => (s.Id || s.id) === (attendance.studentId_c?.Id || attendance.studentId_c || attendance.studentId));
+        const student = data.students?.find(s => (s.Id || s.id) === (attendance.studentId_c?.Id || attendance.studentId_c || attendance.studentId));
+        const status = attendance.status_c || attendance.status || "Unknown";
+        let dateStr = "Unknown Date";
+        try {
+          dateStr = format(new Date(attendance.date_c || attendance.date), "MMM dd");
+        } catch {
+          dateStr = "Unknown Date";
+        }
         return {
           id: attendance.Id || attendance.id,
           type: "attendance",
-          message: `${student?.firstName_c || student?.firstName} ${student?.lastName_c || student?.lastName} was ${(attendance.status_c || attendance.status).toLowerCase()} on ${format(new Date(attendance.date_c || attendance.date), "MMM dd")}`,
+          message: `${student?.firstName_c || student?.firstName || "Unknown"} ${student?.lastName_c || student?.lastName || "Student"} was ${status.toLowerCase()} on ${dateStr}`,
           date: attendance.date_c || attendance.date,
-          status: (attendance.status_c || attendance.status) === "Present" ? "success" : "error"
+          status: status === "Present" ? "success" : "error"
         };
       });
 
     return [...recentGrades, ...recentAttendance]
-      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .sort((a, b) => {
+        try {
+          return new Date(b.date) - new Date(a.date);
+        } catch {
+          return 0;
+        }
+      })
       .slice(0, 8);
   };
 
