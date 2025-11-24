@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { format } from "date-fns";
-import gradeService from "@/services/api/gradeService";
 import studentService from "@/services/api/studentService";
-import attendanceService from "@/services/api/attendanceService";
 import ApperIcon from "@/components/ApperIcon";
 import Loading from "@/components/ui/Loading";
 import Select from "@/components/atoms/Select";
@@ -33,15 +31,11 @@ const [formData, setFormData] = useState({
     section_c: "",
     status_c: "Active"
   });
-  const [grades, setGrades] = useState([]);
-  const [attendance, setAttendance] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
-  const tabs = [
-    { id: "profile", label: "Profile", icon: "User" },
-    { id: "grades", label: "Grades", icon: "Award" },
-    { id: "attendance", label: "Attendance", icon: "Calendar" }
+const tabs = [
+    { id: "profile", label: "Profile", icon: "User" }
   ];
 
   useEffect(() => {
@@ -59,8 +53,8 @@ firstName_c: student.firstName_c || student.firstName || "",
         status_c: student.status_c || student.status || "Active"
 });
       
-      if (mode === "view") {
-        loadStudentData(student.Id || student.id);
+if (mode === "view") {
+        // Student data is already passed via props
       }
     } else {
       // Reset form for new student
@@ -81,21 +75,6 @@ firstName_c: student.firstName_c || student.firstName || "",
     setErrors({});
   }, [student, mode]);
 
-  const loadStudentData = async (studentId) => {
-    try {
-      setLoading(true);
-const [gradesData, attendanceData] = await Promise.all([
-        gradeService.getByStudentId(studentId),
-        attendanceService.getByStudentId(studentId)
-      ]);
-      setGrades(gradesData);
-      setAttendance(attendanceData);
-    } catch (error) {
-      toast.error("Failed to load student data");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -157,17 +136,6 @@ await studentService.create(formData);
     }
   };
 
-  const calculateAttendancePercentage = () => {
-    if (attendance.length === 0) return 0;
-    const presentCount = attendance.filter(a => a.status === "Present").length;
-    return Math.round((presentCount / attendance.length) * 100);
-  };
-
-  const calculateAverageGrade = () => {
-    if (grades.length === 0) return 0;
-    const total = grades.reduce((sum, grade) => sum + grade.percentage, 0);
-    return Math.round(total / grades.length);
-  };
 
 const modalTitle = mode === "create" ? "Add New Student" : 
                    mode === "edit" ? "Edit Student" : 
@@ -316,90 +284,6 @@ const modalTitle = mode === "create" ? "Add New Student" :
           </div>
         )}
 
-        {activeTab === "grades" && (
-          <div className="space-y-4">
-            {loading ? (
-              <div className="text-center py-8">
-                <div className="animate-spin h-8 w-8 border-4 border-primary-500 border-t-transparent rounded-full mx-auto"></div>
-                <p className="text-gray-600 mt-2">Loading grades...</p>
-              </div>
-            ) : grades.length > 0 ? (
-              <>
-                <div className="flex items-center justify-between">
-                  <h4 className="text-lg font-semibold">Academic Performance</h4>
-                  <div className="text-right">
-                    <p className="text-sm text-gray-600">Average Grade</p>
-                    <p className="text-2xl font-bold text-primary-600">{calculateAverageGrade()}%</p>
-                  </div>
-                </div>
-                <div className="space-y-3">
-{grades.map((grade) => (
-                    <div key={grade.Id || grade.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                      <div>
-                        <p className="font-medium text-gray-900">{grade.subject_c || grade.subject}</p>
-                        <p className="text-sm text-gray-600">{grade.term_c || grade.term} • {format(new Date(grade.date_c || grade.date), "MMM dd, yyyy")}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-lg font-bold text-gray-900">{grade.marks_c || grade.marks}/{grade.maxMarks_c || grade.maxMarks}</p>
-                        <Badge variant={(grade.percentage_c || grade.percentage) >= 80 ? "success" : (grade.percentage_c || grade.percentage) >= 60 ? "warning" : "error"}>
-                          {grade.percentage_c || grade.percentage}% ({grade.gradeLetter_c || grade.gradeLetter})
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <div className="text-center py-8">
-                <ApperIcon name="Award" className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                <p className="text-gray-600">No grades recorded yet</p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === "attendance" && (
-          <div className="space-y-4">
-            {loading ? (
-              <div className="text-center py-8">
-                <div className="animate-spin h-8 w-8 border-4 border-primary-500 border-t-transparent rounded-full mx-auto"></div>
-                <p className="text-gray-600 mt-2">Loading attendance...</p>
-              </div>
-            ) : attendance.length > 0 ? (
-              <>
-                <div className="flex items-center justify-between">
-                  <h4 className="text-lg font-semibold">Attendance Record</h4>
-                  <div className="text-right">
-                    <p className="text-sm text-gray-600">Attendance Rate</p>
-                    <p className="text-2xl font-bold text-green-600">{calculateAttendancePercentage()}%</p>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-60 overflow-y-auto">
-                  {attendance.map((record) => (
-<div key={record.Id || record.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">
-                          {format(new Date(record.date_c || record.date), "MMM dd, yyyy")}
-                        </p>
-                        {(record.remarks_c || record.remarks) && (
-                          <p className="text-xs text-gray-600">{record.remarks_c || record.remarks}</p>
-                        )}
-                      </div>
-                      <Badge variant={(record.status_c || record.status) === "Present" ? "success" : "error"}>
-                        {record.status_c || record.status}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <div className="text-center py-8">
-                <ApperIcon name="Calendar" className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                <p className="text-gray-600">No attendance records yet</p>
-              </div>
-            )}
-          </div>
-        )}
       </div>
     </Modal>
   );
