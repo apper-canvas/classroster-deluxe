@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect, forwardRef } from 'react';
-import { cn } from '@/utils/cn';
-import ApperIcon from '@/components/ApperIcon';
+import React, { forwardRef, useEffect, useRef, useState } from "react";
+import ApperIcon from "@/components/ApperIcon";
+import { cn } from "@/utils/cn";
 
 const TagInput = forwardRef(({ 
   name,
@@ -39,8 +39,7 @@ const TagInput = forwardRef(({
       onChange(event);
     }
   };
-
-  const addTag = (tagText) => {
+const addTag = (tagText) => {
     const trimmedTag = tagText.trim();
     if (trimmedTag && !tags.includes(trimmedTag)) {
       const newTags = [...tags, trimmedTag];
