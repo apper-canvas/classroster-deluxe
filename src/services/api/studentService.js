@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 
 class StudentService {
   constructor() {
-this.tableName = "students_c";
+this.tableName = "Students_c";
   }
   async getAll() {
     try {
