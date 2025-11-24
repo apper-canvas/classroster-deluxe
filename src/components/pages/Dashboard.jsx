@@ -53,16 +53,16 @@ const Dashboard = () => {
   };
 
   const calculateStats = () => {
-    const totalStudents = data.students.length;
-    const activeStudents = data.students.filter(s => s.status === "Active").length;
+const totalStudents = data.students.length;
+    const activeStudents = data.students.filter(s => (s.status_c || s.status) === "Active").length;
     
     // Calculate average grade
     const averageGrade = data.grades.length > 0 
-      ? Math.round(data.grades.reduce((sum, grade) => sum + grade.percentage, 0) / data.grades.length)
+      ? Math.round(data.grades.reduce((sum, grade) => sum + (grade.percentage_c || grade.percentage), 0) / data.grades.length)
       : 0;
     
     // Calculate today's attendance rate
-    const todayAttendance = data.attendance.filter(a => isToday(new Date(a.date)));
+    const todayAttendance = data.attendance.filter(a => isToday(new Date(a.date_c || a.date)));
     const attendanceRate = todayAttendance.length > 0
       ? Math.round((todayAttendance.filter(a => a.status === "Present").length / todayAttendance.length) * 100)
       : 0;
@@ -76,11 +76,11 @@ const Dashboard = () => {
   };
 
   const getRecentActivity = () => {
-    const recentGrades = data.grades
-      .sort((a, b) => new Date(b.date) - new Date(a.date))
+const recentGrades = data.grades
+      .sort((a, b) => new Date(b.date_c || b.date) - new Date(a.date_c || a.date))
       .slice(0, 5)
       .map(grade => {
-        const student = data.students.find(s => s.id === grade.studentId);
+        const student = data.students.find(s => (s.Id || s.id) === (grade.studentId_c?.Id || grade.studentId_c || grade.studentId));
         return {
           id: grade.id,
           type: "grade",
@@ -90,18 +90,18 @@ const Dashboard = () => {
         };
       });
 
-    const recentAttendance = data.attendance
-      .filter(a => new Date(a.date) >= subDays(new Date(), 7))
-      .sort((a, b) => new Date(b.date) - new Date(a.date))
+const recentAttendance = data.attendance
+      .filter(a => new Date(a.date_c || a.date) >= subDays(new Date(), 7))
+      .sort((a, b) => new Date(b.date_c || b.date) - new Date(a.date_c || a.date))
       .slice(0, 3)
       .map(attendance => {
-        const student = data.students.find(s => s.id === attendance.studentId);
+        const student = data.students.find(s => (s.Id || s.id) === (attendance.studentId_c?.Id || attendance.studentId_c || attendance.studentId));
         return {
-          id: attendance.id,
+          id: attendance.Id || attendance.id,
           type: "attendance",
-          message: `${student?.firstName} ${student?.lastName} was ${attendance.status.toLowerCase()} on ${format(new Date(attendance.date), "MMM dd")}`,
-          date: attendance.date,
-          status: attendance.status === "Present" ? "success" : "error"
+          message: `${student?.firstName_c || student?.firstName} ${student?.lastName_c || student?.lastName} was ${(attendance.status_c || attendance.status).toLowerCase()} on ${format(new Date(attendance.date_c || attendance.date), "MMM dd")}`,
+          date: attendance.date_c || attendance.date,
+          status: (attendance.status_c || attendance.status) === "Present" ? "success" : "error"
         };
       });
 

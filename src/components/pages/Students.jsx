@@ -60,14 +60,14 @@ const Students = () => {
       return;
     }
 
-    const filtered = students.filter(student => {
-      const fullName = `${student.firstName} ${student.lastName}`.toLowerCase();
+const filtered = students.filter(student => {
+      const fullName = `${student.firstName_c || student.firstName || ''} ${student.lastName_c || student.lastName || ''}`.toLowerCase();
       const search = searchTerm.toLowerCase();
       
       return fullName.includes(search) ||
-             student.studentId.toLowerCase().includes(search) ||
-             student.email.toLowerCase().includes(search) ||
-             student.grade.toLowerCase().includes(search);
+             (student.studentId_c || student.studentId || '').toLowerCase().includes(search) ||
+             (student.email_c || student.email || '').toLowerCase().includes(search) ||
+             (student.grade_c || student.grade || '').toLowerCase().includes(search);
     });
 
     setFilteredStudents(filtered);
@@ -109,7 +109,7 @@ const Students = () => {
 
   const confirmDelete = async () => {
     try {
-      await studentService.delete(studentToDelete.id);
+await studentService.delete(studentToDelete.Id || studentToDelete.id);
       setStudents(prev => prev.filter(s => s.id !== studentToDelete.id));
       toast.success("Student deleted successfully");
     } catch (error) {
@@ -251,14 +251,14 @@ const Students = () => {
             <div className="bg-gray-50 p-4 rounded-lg">
               <div className="flex items-center space-x-3">
                 <div className="h-10 w-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-white font-semibold">
-                  {studentToDelete.firstName?.charAt(0)}{studentToDelete.lastName?.charAt(0)}
+{(studentToDelete.firstName_c || studentToDelete.firstName)?.charAt(0)}{(studentToDelete.lastName_c || studentToDelete.lastName)?.charAt(0)}
                 </div>
                 <div>
                   <p className="font-medium text-gray-900">
-                    {studentToDelete.firstName} {studentToDelete.lastName}
+                    {studentToDelete.firstName_c || studentToDelete.firstName} {studentToDelete.lastName_c || studentToDelete.lastName}
                   </p>
                   <p className="text-sm text-gray-600">
-                    ID: {studentToDelete.studentId} • Grade: {studentToDelete.grade}
+                    ID: {studentToDelete.studentId_c || studentToDelete.studentId} • Grade: {studentToDelete.grade_c || studentToDelete.grade}
                   </p>
                 </div>
               </div>

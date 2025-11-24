@@ -1,90 +1,286 @@
-import attendanceData from "@/services/mockData/attendance.json";
+import { getApperClient } from "@/services/apperClient";
+import { toast } from "react-toastify";
 
 class AttendanceService {
   constructor() {
-    this.data = [...attendanceData];
-  }
-
-  async delay() {
-    return new Promise(resolve => setTimeout(resolve, Math.random() * 300 + 200));
+    this.tableName = "attendance_c";
   }
 
   async getAll() {
-    await this.delay();
-    return [...this.data];
+    try {
+      const apperClient = getApperClient();
+      if (!apperClient) {
+        throw new Error("ApperClient not initialized");
+      }
+
+      const params = {
+        fields: [
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "studentId_c"}},
+          {"field": {"Name": "date_c"}},
+          {"field": {"Name": "status_c"}},
+          {"field": {"Name": "remarks_c"}}
+        ]
+      };
+
+      const response = await apperClient.fetchRecords(this.tableName, params);
+
+      if (!response.success) {
+        console.error(response.message);
+        toast.error(response.message);
+        return [];
+      }
+
+      if (!response?.data?.length) {
+        return [];
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching attendance:", error?.response?.data?.message || error);
+      return [];
+    }
   }
 
   async getById(id) {
-    await this.delay();
-    const record = this.data.find(item => item.Id === parseInt(id));
-    if (!record) {
-      throw new Error("Attendance record not found");
+    try {
+      const apperClient = getApperClient();
+      if (!apperClient) {
+        throw new Error("ApperClient not initialized");
+      }
+
+      const params = {
+        fields: [
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "studentId_c"}},
+          {"field": {"Name": "date_c"}},
+          {"field": {"Name": "status_c"}},
+          {"field": {"Name": "remarks_c"}}
+        ]
+      };
+
+      const response = await apperClient.getRecordById(this.tableName, parseInt(id), params);
+
+      if (!response?.data) {
+        return null;
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching attendance record ${id}:`, error?.response?.data?.message || error);
+      return null;
     }
-    return { ...record };
   }
 
   async getByStudentId(studentId) {
-    await this.delay();
-    return this.data
-      .filter(item => item.studentId === studentId.toString())
-      .map(item => ({ ...item }))
-      .sort((a, b) => new Date(b.date) - new Date(a.date));
+    try {
+      const apperClient = getApperClient();
+      if (!apperClient) {
+        throw new Error("ApperClient not initialized");
+      }
+
+      const params = {
+        fields: [
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "studentId_c"}},
+          {"field": {"Name": "date_c"}},
+          {"field": {"Name": "status_c"}},
+          {"field": {"Name": "remarks_c"}}
+        ],
+        where: [{
+          "FieldName": "studentId_c",
+          "Operator": "EqualTo",
+          "Values": [parseInt(studentId)]
+        }],
+        orderBy: [{
+          "fieldName": "date_c",
+          "sorttype": "DESC"
+        }]
+      };
+
+      const response = await apperClient.fetchRecords(this.tableName, params);
+
+      if (!response.success) {
+        console.error(response.message);
+        return [];
+      }
+
+      return response.data || [];
+    } catch (error) {
+      console.error(`Error fetching attendance for student ${studentId}:`, error?.response?.data?.message || error);
+      return [];
+    }
   }
 
   async getByDate(date) {
-    await this.delay();
-    const targetDate = date.split('T')[0];
-    return this.data
-      .filter(item => item.date.split('T')[0] === targetDate)
-      .map(item => ({ ...item }));
+    try {
+      const apperClient = getApperClient();
+      if (!apperClient) {
+        throw new Error("ApperClient not initialized");
+      }
+
+      const targetDate = date.split('T')[0];
+
+      const params = {
+        fields: [
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "studentId_c"}},
+          {"field": {"Name": "date_c"}},
+          {"field": {"Name": "status_c"}},
+          {"field": {"Name": "remarks_c"}}
+        ],
+        where: [{
+          "FieldName": "date_c",
+          "Operator": "EqualTo",
+          "Values": [targetDate]
+        }]
+      };
+
+      const response = await apperClient.fetchRecords(this.tableName, params);
+
+      if (!response.success) {
+        console.error(response.message);
+        return [];
+      }
+
+      return response.data || [];
+    } catch (error) {
+      console.error(`Error fetching attendance for date ${date}:`, error?.response?.data?.message || error);
+      return [];
+    }
   }
 
   async create(attendanceRecord) {
-    await this.delay();
-    
-    const maxId = this.data.length > 0 ? Math.max(...this.data.map(item => item.Id)) : 0;
-    const newRecord = {
-      ...attendanceRecord,
-      Id: maxId + 1,
-      id: (maxId + 1).toString(),
-      date: attendanceRecord.date + "T00:00:00.000Z"
-    };
-    
-    this.data.push(newRecord);
-    return { ...newRecord };
+    try {
+      const apperClient = getApperClient();
+      if (!apperClient) {
+        throw new Error("ApperClient not initialized");
+      }
+
+      const params = {
+        records: [{
+          Name: `${attendanceRecord.studentId_c} - ${attendanceRecord.date_c}`,
+          studentId_c: parseInt(attendanceRecord.studentId_c),
+          date_c: attendanceRecord.date_c,
+          status_c: attendanceRecord.status_c,
+          remarks_c: attendanceRecord.remarks_c || ""
+        }]
+      };
+
+      const response = await apperClient.createRecord(this.tableName, params);
+
+      if (!response.success) {
+        console.error(response.message);
+        toast.error(response.message);
+        return null;
+      }
+
+      if (response.results) {
+        const successful = response.results.filter(r => r.success);
+        const failed = response.results.filter(r => !r.success);
+
+        if (failed.length > 0) {
+          console.error(`Failed to create ${failed.length} attendance records:`, failed);
+          failed.forEach(record => {
+            record.errors?.forEach(error => toast.error(`${error.fieldLabel}: ${error}`));
+            if (record.message) toast.error(record.message);
+          });
+        }
+        return successful.length > 0 ? successful[0].data : null;
+      }
+    } catch (error) {
+      console.error("Error creating attendance record:", error?.response?.data?.message || error);
+      return null;
+    }
   }
 
   async update(id, attendanceRecord) {
-    await this.delay();
-    
-    const index = this.data.findIndex(item => item.Id === parseInt(id));
-    if (index === -1) {
-      throw new Error("Attendance record not found");
+    try {
+      const apperClient = getApperClient();
+      if (!apperClient) {
+        throw new Error("ApperClient not initialized");
+      }
+
+      const updateData = {
+        Id: parseInt(id)
+      };
+
+      if (attendanceRecord.studentId_c && attendanceRecord.date_c) {
+        updateData.Name = `${attendanceRecord.studentId_c} - ${attendanceRecord.date_c}`;
+      }
+      if (attendanceRecord.studentId_c !== undefined) updateData.studentId_c = parseInt(attendanceRecord.studentId_c);
+      if (attendanceRecord.date_c) updateData.date_c = attendanceRecord.date_c;
+      if (attendanceRecord.status_c) updateData.status_c = attendanceRecord.status_c;
+      if (attendanceRecord.remarks_c !== undefined) updateData.remarks_c = attendanceRecord.remarks_c;
+
+      const params = {
+        records: [updateData]
+      };
+
+      const response = await apperClient.updateRecord(this.tableName, params);
+
+      if (!response.success) {
+        console.error(response.message);
+        toast.error(response.message);
+        return null;
+      }
+
+      if (response.results) {
+        const successful = response.results.filter(r => r.success);
+        const failed = response.results.filter(r => !r.success);
+
+        if (failed.length > 0) {
+          console.error(`Failed to update ${failed.length} attendance records:`, failed);
+          failed.forEach(record => {
+            record.errors?.forEach(error => toast.error(`${error.fieldLabel}: ${error}`));
+            if (record.message) toast.error(record.message);
+          });
+        }
+        return successful.length > 0 ? successful[0].data : null;
+      }
+    } catch (error) {
+      console.error("Error updating attendance record:", error?.response?.data?.message || error);
+      return null;
     }
-    
-    this.data[index] = {
-      ...this.data[index],
-      ...attendanceRecord,
-      Id: this.data[index].Id,
-      id: this.data[index].id,
-      date: attendanceRecord.date + "T00:00:00.000Z"
-    };
-    
-    return { ...this.data[index] };
   }
 
   async delete(id) {
-    await this.delay();
-    
-    const index = this.data.findIndex(item => item.Id === parseInt(id));
-    if (index === -1) {
-      throw new Error("Attendance record not found");
+    try {
+      const apperClient = getApperClient();
+      if (!apperClient) {
+        throw new Error("ApperClient not initialized");
+      }
+
+      const params = {
+        RecordIds: [parseInt(id)]
+      };
+
+      const response = await apperClient.deleteRecord(this.tableName, params);
+
+      if (!response.success) {
+        console.error(response.message);
+        toast.error(response.message);
+        return false;
+      }
+
+      if (response.results) {
+        const successful = response.results.filter(r => r.success);
+        const failed = response.results.filter(r => !r.success);
+
+        if (failed.length > 0) {
+          console.error(`Failed to delete ${failed.length} attendance records:`, failed);
+          failed.forEach(record => {
+            if (record.message) toast.error(record.message);
+          });
+        }
+        return successful.length === 1;
+      }
+    } catch (error) {
+      console.error("Error deleting attendance record:", error?.response?.data?.message || error);
+      return false;
     }
-    
-    const deleted = this.data[index];
-    this.data.splice(index, 1);
-    return { ...deleted };
   }
 }
 
+export default new AttendanceService();
 export default new AttendanceService();

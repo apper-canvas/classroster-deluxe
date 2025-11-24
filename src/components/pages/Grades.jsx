@@ -90,12 +90,12 @@ const Grades = () => {
     }
 
     const filtered = students.filter(student => {
-      const fullName = `${student.firstName} ${student.lastName}`.toLowerCase();
+const fullName = `${student.firstName_c || student.firstName || ''} ${student.lastName_c || student.lastName || ''}`.toLowerCase();
       const search = searchTerm.toLowerCase();
       
       return fullName.includes(search) ||
-             student.studentId.toLowerCase().includes(search) ||
-             student.grade.toLowerCase().includes(search);
+             (student.studentId_c || student.studentId || '').toLowerCase().includes(search) ||
+             (student.grade_c || student.grade || '').toLowerCase().includes(search);
     });
 
     setFilteredStudents(filtered);
@@ -127,13 +127,13 @@ const Grades = () => {
 
   const handleEditGrade = (grade) => {
     setEditingGrade(grade);
-    setGradeForm({
-      studentId: grade.studentId,
-      subject: grade.subject,
-      marks: grade.marks.toString(),
-      maxMarks: grade.maxMarks.toString(),
-      term: grade.term,
-      date: grade.date.split('T')[0]
+setGradeForm({
+      studentId_c: grade.studentId_c?.Id || grade.studentId_c || grade.studentId,
+      subject_c: grade.subject_c || grade.subject,
+      marks_c: (grade.marks_c || grade.marks).toString(),
+      maxMarks_c: (grade.maxMarks_c || grade.maxMarks).toString(),
+      term_c: grade.term_c || grade.term,
+      date_c: (grade.date_c || grade.date).split('T')[0]
     });
     setFormErrors({});
     setShowGradeModal(true);
@@ -143,7 +143,7 @@ const Grades = () => {
     if (!confirm("Are you sure you want to delete this grade?")) return;
 
     try {
-      await gradeService.delete(gradeId);
+await gradeService.delete(gradeId);
       setGrades(prev => prev.filter(g => g.id !== gradeId));
       toast.success("Grade deleted successfully");
     } catch (error) {
@@ -164,13 +164,13 @@ const Grades = () => {
   const validateForm = () => {
     const errors = {};
     
-    if (!gradeForm.subject.trim()) errors.subject = "Subject is required";
-    if (!gradeForm.marks.trim()) errors.marks = "Marks are required";
-    if (isNaN(gradeForm.marks) || gradeForm.marks < 0) errors.marks = "Enter valid marks";
-    if (!gradeForm.maxMarks.trim()) errors.maxMarks = "Max marks are required";
-    if (isNaN(gradeForm.maxMarks) || gradeForm.maxMarks <= 0) errors.maxMarks = "Enter valid max marks";
-    if (parseFloat(gradeForm.marks) > parseFloat(gradeForm.maxMarks)) {
-      errors.marks = "Marks cannot exceed max marks";
+if (!gradeForm.subject_c.trim()) errors.subject_c = "Subject is required";
+    if (!gradeForm.marks_c.trim()) errors.marks_c = "Marks are required";
+    if (isNaN(gradeForm.marks_c) || gradeForm.marks_c < 0) errors.marks_c = "Enter valid marks";
+    if (!gradeForm.maxMarks_c.trim()) errors.maxMarks_c = "Max marks are required";
+    if (isNaN(gradeForm.maxMarks_c) || gradeForm.maxMarks_c <= 0) errors.maxMarks_c = "Enter valid max marks";
+    if (parseFloat(gradeForm.marks_c) > parseFloat(gradeForm.maxMarks_c)) {
+      errors.marks_c = "Marks cannot exceed max marks";
     }
     if (!gradeForm.date) errors.date = "Date is required";
     
@@ -204,19 +204,19 @@ const Grades = () => {
       const maxMarks = parseFloat(gradeForm.maxMarks);
       const { percentage, gradeLetter } = calculateGradeData(marks, maxMarks);
 
-      const gradeData = {
-        studentId: gradeForm.studentId,
-        subject: gradeForm.subject,
-        marks,
-        maxMarks,
-        percentage,
-        gradeLetter,
-        term: gradeForm.term,
-        date: gradeForm.date
+const gradeData = {
+        studentId_c: gradeForm.studentId_c,
+        subject_c: gradeForm.subject_c,
+        marks_c: marks,
+        maxMarks_c: maxMarks,
+        percentage_c: percentage,
+        gradeLetter_c: gradeLetter,
+        term_c: gradeForm.term_c,
+        date_c: gradeForm.date_c
       };
 
-      if (editingGrade) {
-        await gradeService.update(editingGrade.id, gradeData);
+if (editingGrade) {
+        await gradeService.update(editingGrade.Id || editingGrade.id, gradeData);
         toast.success("Grade updated successfully");
       } else {
         await gradeService.create(gradeData);
@@ -239,7 +239,7 @@ const Grades = () => {
   const calculateStudentStats = () => {
     if (grades.length === 0) return { average: 0, highest: 0, lowest: 0 };
     
-    const percentages = grades.map(g => g.percentage);
+const percentages = grades.map(g => g.percentage_c || g.percentage);
     return {
       average: Math.round(percentages.reduce((sum, p) => sum + p, 0) / percentages.length),
       highest: Math.max(...percentages),
@@ -250,7 +250,7 @@ const Grades = () => {
   if (loading) return <Loading />;
   if (error) return <ErrorView onRetry={loadData} />;
 
-  const selectedStudentData = students.find(s => s.id === selectedStudent);
+const selectedStudentData = students.find(s => (s.Id || s.id) === selectedStudent);
   const stats = selectedStudent ? calculateStudentStats() : { average: 0, highest: 0, lowest: 0 };
 
   return (
@@ -291,24 +291,24 @@ const Grades = () => {
               {filteredStudents.length > 0 ? (
                 filteredStudents.map((student) => (
                   <button
-                    key={student.id}
-                    onClick={() => handleStudentSelect(student.id)}
+key={student.Id || student.id}
+                    onClick={() => handleStudentSelect(student.Id || student.id)}
                     className={`w-full text-left p-3 rounded-lg border transition-all duration-200 ${
-                      selectedStudent === student.id
+                      selectedStudent === (student.Id || student.id)
                         ? "border-primary-500 bg-primary-50"
                         : "border-gray-200 hover:border-primary-300 hover:bg-gray-50"
                     }`}
                   >
                     <div className="flex items-center space-x-3">
                       <div className="h-8 w-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-white text-sm font-semibold">
-                        {student.firstName?.charAt(0)}{student.lastName?.charAt(0)}
+                        {(student.firstName_c || student.firstName)?.charAt(0)}{(student.lastName_c || student.lastName)?.charAt(0)}
                       </div>
                       <div>
                         <p className="font-medium text-gray-900">
-                          {student.firstName} {student.lastName}
+                          {student.firstName_c || student.firstName} {student.lastName_c || student.lastName}
                         </p>
                         <p className="text-xs text-gray-600">
-                          ID: {student.studentId} • Grade: {student.grade}
+                          ID: {student.studentId_c || student.studentId} • Grade: {student.grade_c || student.grade}
                         </p>
                       </div>
                     </div>
@@ -332,15 +332,15 @@ const Grades = () => {
             <Card className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center space-x-3">
-                  <div className="h-12 w-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-white font-semibold">
-                    {selectedStudentData?.firstName?.charAt(0)}{selectedStudentData?.lastName?.charAt(0)}
+<div className="h-12 w-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-white font-semibold">
+                    {(selectedStudentData?.firstName_c || selectedStudentData?.firstName)?.charAt(0)}{(selectedStudentData?.lastName_c || selectedStudentData?.lastName)?.charAt(0)}
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">
-                      {selectedStudentData?.firstName} {selectedStudentData?.lastName}
+                      {selectedStudentData?.firstName_c || selectedStudentData?.firstName} {selectedStudentData?.lastName_c || selectedStudentData?.lastName}
                     </h3>
                     <p className="text-sm text-gray-600">
-                      ID: {selectedStudentData?.studentId} • Grade: {selectedStudentData?.grade}
+                      ID: {selectedStudentData?.studentId_c || selectedStudentData?.studentId} • Grade: {selectedStudentData?.grade_c || selectedStudentData?.grade}
                     </p>
                   </div>
                 </div>
@@ -377,21 +377,21 @@ const Grades = () => {
                 <div className="space-y-3">
                   <h4 className="font-semibold text-gray-900">Grade Records</h4>
                   {grades.map((grade) => (
-                    <div key={grade.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+<div key={grade.Id || grade.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                       <div className="flex-1">
                         <div className="flex items-center space-x-4">
                           <div>
-                            <p className="font-medium text-gray-900">{grade.subject}</p>
+                            <p className="font-medium text-gray-900">{grade.subject_c || grade.subject}</p>
                             <p className="text-sm text-gray-600">
-                              {grade.term} • {format(new Date(grade.date), "MMM dd, yyyy")}
+                              {grade.term_c || grade.term} • {format(new Date(grade.date_c || grade.date), "MMM dd, yyyy")}
                             </p>
                           </div>
                           <div className="text-center">
                             <p className="text-lg font-bold text-gray-900">
-                              {grade.marks}/{grade.maxMarks}
+                              {grade.marks_c || grade.marks}/{grade.maxMarks_c || grade.maxMarks}
                             </p>
-                            <Badge variant={getGradeVariant(grade.percentage)}>
-                              {grade.percentage}% ({grade.gradeLetter})
+                            <Badge variant={getGradeVariant(grade.percentage_c || grade.percentage)}>
+                              {grade.percentage_c || grade.percentage}% ({grade.gradeLetter_c || grade.gradeLetter})
                             </Badge>
                           </div>
                         </div>
@@ -408,7 +408,7 @@ const Grades = () => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleDeleteGrade(grade.id)}
+onClick={() => handleDeleteGrade(grade.Id || grade.id)}
                           className="h-8 w-8 p-0 hover:bg-red-100 hover:text-red-600"
                         >
                           <ApperIcon name="Trash2" className="h-4 w-4" />
@@ -455,12 +455,12 @@ const Grades = () => {
       >
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Select
+<Select
               label="Subject"
-              name="subject"
-              value={gradeForm.subject}
+              name="subject_c"
+              value={gradeForm.subject_c}
               onChange={handleFormChange}
-              error={formErrors.subject}
+              error={formErrors.subject_c}
               required
             >
               <option value="">Select Subject</option>
@@ -471,8 +471,8 @@ const Grades = () => {
 
             <Select
               label="Term"
-              name="term"
-              value={gradeForm.term}
+              name="term_c"
+              value={gradeForm.term_c}
               onChange={handleFormChange}
               required
             >
@@ -483,33 +483,33 @@ const Grades = () => {
 
             <Input
               label="Marks Obtained"
-              name="marks"
+              name="marks_c"
               type="number"
               min="0"
-              value={gradeForm.marks}
+              value={gradeForm.marks_c}
               onChange={handleFormChange}
-              error={formErrors.marks}
+              error={formErrors.marks_c}
               required
             />
 
             <Input
               label="Maximum Marks"
-              name="maxMarks"
+              name="maxMarks_c"
               type="number"
               min="1"
-              value={gradeForm.maxMarks}
+              value={gradeForm.maxMarks_c}
               onChange={handleFormChange}
-              error={formErrors.maxMarks}
+              error={formErrors.maxMarks_c}
               required
             />
 
             <Input
               label="Date"
-              name="date"
+              name="date_c"
               type="date"
-              value={gradeForm.date}
+              value={gradeForm.date_c}
               onChange={handleFormChange}
-              error={formErrors.date}
+              error={formErrors.date_c}
               required
             />
           </div>
@@ -521,14 +521,14 @@ const Grades = () => {
               <div className="flex items-center space-x-4">
                 <div>
                   <p className="text-sm text-gray-600">Percentage</p>
-                  <p className="text-lg font-bold">
-                    {Math.round((parseFloat(gradeForm.marks) / parseFloat(gradeForm.maxMarks)) * 100)}%
+<p className="text-lg font-bold">
+                    {Math.round((parseFloat(gradeForm.marks_c) / parseFloat(gradeForm.maxMarks_c)) * 100)}%
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Letter Grade</p>
-                  <Badge variant={getGradeVariant(Math.round((parseFloat(gradeForm.marks) / parseFloat(gradeForm.maxMarks)) * 100))}>
-                    {calculateGradeData(parseFloat(gradeForm.marks), parseFloat(gradeForm.maxMarks)).gradeLetter}
+                  <Badge variant={getGradeVariant(Math.round((parseFloat(gradeForm.marks_c) / parseFloat(gradeForm.maxMarks_c)) * 100))}>
+                    {calculateGradeData(parseFloat(gradeForm.marks_c), parseFloat(gradeForm.maxMarks_c)).gradeLetter}
                   </Badge>
                 </div>
               </div>

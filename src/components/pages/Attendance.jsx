@@ -1,17 +1,17 @@
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { endOfWeek, format, isToday, startOfWeek, subDays } from "date-fns";
+import studentService from "@/services/api/studentService";
+import attendanceService from "@/services/api/attendanceService";
+import ApperIcon from "@/components/ApperIcon";
+import Loading from "@/components/ui/Loading";
+import ErrorView from "@/components/ui/ErrorView";
+import Empty from "@/components/ui/Empty";
 import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
 import Card from "@/components/atoms/Card";
 import Badge from "@/components/atoms/Badge";
 import SearchBar from "@/components/molecules/SearchBar";
-import Loading from "@/components/ui/Loading";
-import ErrorView from "@/components/ui/ErrorView";
-import Empty from "@/components/ui/Empty";
-import ApperIcon from "@/components/ApperIcon";
-import studentService from "@/services/api/studentService";
-import attendanceService from "@/services/api/attendanceService";
-import { format, isToday, subDays, startOfWeek, endOfWeek } from "date-fns";
 
 const Attendance = () => {
   const [students, setStudents] = useState([]);
@@ -56,21 +56,21 @@ const Attendance = () => {
 
   const loadAttendanceForDate = () => {
     const dateAttendance = attendance.filter(
-      record => record.date.split('T')[0] === selectedDate
+record => (record.date_c || record.date).split('T')[0] === selectedDate
     );
     
     const attendanceMap = {};
     dateAttendance.forEach(record => {
-      attendanceMap[record.studentId] = {
-        status: record.status,
-        remarks: record.remarks || "",
-        id: record.id
+attendanceMap[record.studentId_c?.Id || record.studentId_c || record.studentId] = {
+        status: record.status_c || record.status,
+        remarks: record.remarks_c || record.remarks || "",
+        id: record.Id || record.id
       };
     });
 
     // Initialize attendance for students not yet recorded
     students.forEach(student => {
-      if (!attendanceMap[student.id]) {
+if (!attendanceMap[student.Id || student.id]) {
         attendanceMap[student.id] = {
           status: "Present",
           remarks: "",
@@ -88,13 +88,13 @@ const Attendance = () => {
       return;
     }
 
-    const filtered = students.filter(student => {
-      const fullName = `${student.firstName} ${student.lastName}`.toLowerCase();
+const filtered = students.filter(student => {
+      const fullName = `${student.firstName_c || student.firstName || ''} ${student.lastName_c || student.lastName || ''}`.toLowerCase();
       const search = searchTerm.toLowerCase();
       
       return fullName.includes(search) ||
-             student.studentId.toLowerCase().includes(search) ||
-             student.grade.toLowerCase().includes(search);
+             (student.studentId_c || student.studentId || '').toLowerCase().includes(search) ||
+             (student.grade_c || student.grade || '').toLowerCase().includes(search);
     });
 
     setFilteredStudents(filtered);
@@ -115,14 +115,14 @@ const Attendance = () => {
       setSaving(true);
       
       const promises = students.map(async (student) => {
-        const record = attendanceData[student.id];
+const record = attendanceData[student.Id || student.id];
         if (!record) return;
 
         const attendanceRecord = {
-          studentId: student.id,
-          date: selectedDate,
-          status: record.status,
-          remarks: record.remarks
+          studentId_c: student.Id || student.id,
+          date_c: selectedDate,
+          status_c: record.status,
+          remarks_c: record.remarks
         };
 
         if (record.id) {
@@ -176,26 +176,25 @@ const Attendance = () => {
     const thisWeekEnd = endOfWeek(new Date()).toISOString().split('T')[0];
     
     // Today's stats
-    const todayRecords = attendance.filter(record => record.date.split('T')[0] === today);
-    const todayPresent = todayRecords.filter(record => record.status === "Present").length;
+const todayRecords = attendance.filter(record => (record.date_c || record.date).split('T')[0] === today);
+    const todayPresent = todayRecords.filter(record => (record.status_c || record.status) === "Present").length;
     const todayTotal = todayRecords.length;
     const todayRate = todayTotal > 0 ? Math.round((todayPresent / todayTotal) * 100) : 0;
 
     // Weekly stats
     const weekRecords = attendance.filter(record => {
-      const recordDate = record.date.split('T')[0];
+      const recordDate = (record.date_c || record.date).split('T')[0];
       return recordDate >= thisWeekStart && recordDate <= thisWeekEnd;
     });
-    const weekPresent = weekRecords.filter(record => record.status === "Present").length;
+const weekPresent = weekRecords.filter(record => (record.status_c || record.status) === "Present").length;
     const weekTotal = weekRecords.length;
     const weekRate = weekTotal > 0 ? Math.round((weekPresent / weekTotal) * 100) : 0;
 
-    // Selected date stats
-    const selectedRecords = attendance.filter(record => record.date.split('T')[0] === selectedDate);
-    const selectedPresent = selectedRecords.filter(record => record.status === "Present").length;
+// Selected date stats
+    const selectedRecords = attendance.filter(record => (record.date_c || record.date).split('T')[0] === selectedDate);
+    const selectedPresent = selectedRecords.filter(record => (record.status_c || record.status) === "Present").length;
     const selectedTotal = selectedRecords.length;
     const selectedRate = selectedTotal > 0 ? Math.round((selectedPresent / selectedTotal) * 100) : 0;
-
     return {
       today: { present: todayPresent, total: todayTotal, rate: todayRate },
       week: { present: weekPresent, total: weekTotal, rate: weekRate },
@@ -343,11 +342,11 @@ const Attendance = () => {
         {filteredStudents.length > 0 ? (
           <div className="divide-y divide-gray-100">
             {filteredStudents.map((student, index) => {
-              const record = attendanceData[student.id] || { status: "Present", remarks: "" };
+const record = attendanceData[student.Id || student.id] || { status: "Present", remarks: "" };
               
               return (
                 <div
-                  key={student.id}
+                  key={student.Id || student.id}
                   className={`p-6 hover:bg-gray-50 transition-colors duration-150 ${
                     index % 2 === 0 ? "bg-white" : "bg-gray-50/50"
                   }`}
@@ -356,14 +355,14 @@ const Attendance = () => {
                     {/* Student Info */}
                     <div className="flex items-center space-x-3 flex-1">
                       <div className="h-10 w-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                        {student.firstName?.charAt(0)}{student.lastName?.charAt(0)}
+                        {(student.firstName_c || student.firstName)?.charAt(0)}{(student.lastName_c || student.lastName)?.charAt(0)}
                       </div>
                       <div>
                         <p className="font-medium text-gray-900">
-                          {student.firstName} {student.lastName}
+                          {student.firstName_c || student.firstName} {student.lastName_c || student.lastName}
                         </p>
                         <p className="text-sm text-gray-600">
-                          ID: {student.studentId} • Grade: {student.grade}
+                          ID: {student.studentId_c || student.studentId} • Grade: {student.grade_c || student.grade}
                         </p>
                       </div>
                     </div>
@@ -371,7 +370,7 @@ const Attendance = () => {
                     {/* Status Buttons */}
                     <div className="flex items-center space-x-2">
                       <button
-                        onClick={() => handleAttendanceChange(student.id, "status", "Present")}
+onClick={() => handleAttendanceChange(student.Id || student.id, "status", "Present")}
                         className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                           record.status === "Present"
                             ? "bg-green-500 text-white shadow-lg"
@@ -382,7 +381,7 @@ const Attendance = () => {
                         Present
                       </button>
                       <button
-                        onClick={() => handleAttendanceChange(student.id, "status", "Absent")}
+                        onClick={() => handleAttendanceChange(student.Id || student.id, "status", "Absent")}
                         className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                           record.status === "Absent"
                             ? "bg-red-500 text-white shadow-lg"
@@ -399,8 +398,8 @@ const Attendance = () => {
                       <input
                         type="text"
                         placeholder="Remarks (optional)"
-                        value={record.remarks}
-                        onChange={(e) => handleAttendanceChange(student.id, "remarks", e.target.value)}
+value={record.remarks}
+onChange={(e) => handleAttendanceChange(student.Id || student.id, "remarks", e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       />
                     </div>

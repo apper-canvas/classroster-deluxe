@@ -32,15 +32,15 @@ const StudentTable = ({
     setSortDirection(direction);
   };
 
-  const sortedStudents = [...students].sort((a, b) => {
+const sortedStudents = [...students].sort((a, b) => {
     if (!sortField) return 0;
     
     let aValue = a[sortField];
     let bValue = b[sortField];
     
     if (sortField === "name") {
-      aValue = `${a.firstName} ${a.lastName}`;
-      bValue = `${b.firstName} ${b.lastName}`;
+      aValue = `${a.firstName_c || a.firstName || ''} ${a.lastName_c || a.lastName || ''}`;
+      bValue = `${b.firstName_c || b.firstName || ''} ${b.lastName_c || b.lastName || ''}`;
     }
     
     if (typeof aValue === "string") {
@@ -66,8 +66,10 @@ const StudentTable = ({
     }
   };
 
-  const getInitials = (firstName, lastName) => {
-    return `${firstName?.charAt(0) || ""}${lastName?.charAt(0) || ""}`.toUpperCase();
+const getInitials = (firstName, lastName) => {
+    const first = firstName?.charAt(0) || "";
+    const last = lastName?.charAt(0) || "";
+    return `${first}${last}`.toUpperCase();
   };
 
   if (loading) {
@@ -121,7 +123,7 @@ const StudentTable = ({
       <div className="divide-y divide-gray-100">
         {sortedStudents.map((student, index) => (
           <div
-            key={student.id}
+key={student.Id || student.id}
             className={cn(
               "px-6 py-4 hover:bg-gray-50 transition-colors duration-150",
               index % 2 === 0 ? "bg-white" : "bg-gray-50/50"
@@ -131,7 +133,7 @@ const StudentTable = ({
               {/* Avatar */}
               <div className="col-span-1">
                 <div className="h-10 w-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                  {getInitials(student.firstName, student.lastName)}
+{getInitials(student.firstName_c || student.firstName, student.lastName_c || student.lastName)}
                 </div>
               </div>
 
@@ -139,33 +141,33 @@ const StudentTable = ({
               <div className="col-span-3">
                 <div className="flex flex-col">
                   <p className="text-sm font-medium text-gray-900">
-                    {student.firstName} {student.lastName}
+{student.firstName_c || student.firstName} {student.lastName_c || student.lastName}
                   </p>
-                  <p className="text-sm text-gray-500">{student.email}</p>
+                  <p className="text-sm text-gray-500">{student.email_c || student.email}</p>
                 </div>
               </div>
 
               {/* Student ID */}
-              <div className="col-span-2">
-                <p className="text-sm font-medium text-gray-900">{student.studentId}</p>
+<div className="col-span-2">
+                <p className="text-sm font-medium text-gray-900">{student.studentId_c || student.studentId}</p>
               </div>
 
               {/* Grade */}
-              <div className="col-span-1">
-                <p className="text-sm font-medium text-gray-900">{student.grade}</p>
+<div className="col-span-1">
+                <p className="text-sm font-medium text-gray-900">{student.grade_c || student.grade}</p>
               </div>
 
               {/* Status */}
               <div className="col-span-2">
-                <Badge variant={getStatusVariant(student.status)}>
-                  {student.status}
+<Badge variant={getStatusVariant(student.status_c || student.status)}>
+                  {student.status_c || student.status}
                 </Badge>
               </div>
 
               {/* Enrollment Date */}
               <div className="col-span-2">
-                <p className="text-sm text-gray-600">
-                  {format(new Date(student.enrollmentDate), "MMM dd, yyyy")}
+<p className="text-sm text-gray-600">
+                  {format(new Date(student.enrollmentDate_c || student.enrollmentDate), "MMM dd, yyyy")}
                 </p>
               </div>
 

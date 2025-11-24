@@ -1,16 +1,18 @@
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import Modal from "@/components/molecules/Modal";
+import { format } from "date-fns";
+import gradeService from "@/services/api/gradeService";
+import studentService from "@/services/api/studentService";
+import attendanceService from "@/services/api/attendanceService";
+import ApperIcon from "@/components/ApperIcon";
+import Loading from "@/components/ui/Loading";
+import Select from "@/components/atoms/Select";
 import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
-import Select from "@/components/atoms/Select";
 import Badge from "@/components/atoms/Badge";
-import ApperIcon from "@/components/ApperIcon";
+import Attendance from "@/components/pages/Attendance";
+import Modal from "@/components/molecules/Modal";
 import { cn } from "@/utils/cn";
-import { format } from "date-fns";
-import studentService from "@/services/api/studentService";
-import gradeService from "@/services/api/gradeService";
-import attendanceService from "@/services/api/attendanceService";
 
 const StudentModal = ({ 
   isOpen, 
@@ -19,17 +21,17 @@ const StudentModal = ({
   mode = "view" // view, edit, create
 }) => {
   const [activeTab, setActiveTab] = useState("profile");
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    studentId: "",
-    dateOfBirth: "",
-    email: "",
-    phone: "",
-    address: "",
-    grade: "",
-    section: "",
-    status: "Active"
+const [formData, setFormData] = useState({
+    firstName_c: "",
+    lastName_c: "",
+    studentId_c: "",
+    dateOfBirth_c: "",
+    email_c: "",
+    phone_c: "",
+    address_c: "",
+    grade_c: "",
+    section_c: "",
+    status_c: "Active"
   });
   const [grades, setGrades] = useState([]);
   const [attendance, setAttendance] = useState([]);
@@ -45,34 +47,34 @@ const StudentModal = ({
   useEffect(() => {
     if (student) {
       setFormData({
-        firstName: student.firstName || "",
-        lastName: student.lastName || "",
-        studentId: student.studentId || "",
-        dateOfBirth: student.dateOfBirth || "",
-        email: student.email || "",
-        phone: student.phone || "",
-        address: student.address || "",
-        grade: student.grade || "",
-        section: student.section || "",
-        status: student.status || "Active"
-      });
+firstName_c: student.firstName_c || student.firstName || "",
+        lastName_c: student.lastName_c || student.lastName || "",
+        studentId_c: student.studentId_c || student.studentId || "",
+        dateOfBirth_c: student.dateOfBirth_c || student.dateOfBirth || "",
+        email_c: student.email_c || student.email || "",
+        phone_c: student.phone_c || student.phone || "",
+        address_c: student.address_c || student.address || "",
+        grade_c: student.grade_c || student.grade || "",
+        section_c: student.section_c || student.section || "",
+        status_c: student.status_c || student.status || "Active"
+});
       
       if (mode === "view") {
-        loadStudentData(student.id);
+        loadStudentData(student.Id || student.id);
       }
     } else {
       // Reset form for new student
       setFormData({
-        firstName: "",
-        lastName: "",
-        studentId: "",
-        dateOfBirth: "",
-        email: "",
-        phone: "",
-        address: "",
-        grade: "",
-        section: "",
-        status: "Active"
+        firstName_c: "",
+        lastName_c: "",
+        studentId_c: "",
+        dateOfBirth_c: "",
+        email_c: "",
+        phone_c: "",
+        address_c: "",
+        grade_c: "",
+        section_c: "",
+        status_c: "Active"
       });
     }
     setActiveTab("profile");
@@ -82,7 +84,7 @@ const StudentModal = ({
   const loadStudentData = async (studentId) => {
     try {
       setLoading(true);
-      const [gradesData, attendanceData] = await Promise.all([
+const [gradesData, attendanceData] = await Promise.all([
         gradeService.getByStudentId(studentId),
         attendanceService.getByStudentId(studentId)
       ]);
@@ -108,14 +110,14 @@ const StudentModal = ({
   const validateForm = () => {
     const newErrors = {};
     
-    if (!formData.firstName.trim()) newErrors.firstName = "First name is required";
-    if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
-    if (!formData.studentId.trim()) newErrors.studentId = "Student ID is required";
-    if (!formData.email.trim()) newErrors.email = "Email is required";
-    if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Invalid email format";
+if (!formData.firstName_c.trim()) newErrors.firstName_c = "First name is required";
+    if (!formData.lastName_c.trim()) newErrors.lastName_c = "Last name is required";
+    if (!formData.studentId_c.trim()) newErrors.studentId_c = "Student ID is required";
+    if (!formData.email_c.trim()) newErrors.email_c = "Email is required";
+    if (formData.email_c && !/\S+@\S+\.\S+/.test(formData.email_c)) {
+      newErrors.email_c = "Invalid email format";
     }
-    if (!formData.grade.trim()) newErrors.grade = "Grade is required";
+    if (!formData.grade_c.trim()) newErrors.grade_c = "Grade is required";
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -131,10 +133,10 @@ const StudentModal = ({
       setLoading(true);
       
       if (mode === "create") {
-        await studentService.create(formData);
+await studentService.create(formData);
         toast.success("Student created successfully");
       } else {
-        await studentService.update(student.id, formData);
+        await studentService.update(student.Id || student.id, formData);
         toast.success("Student updated successfully");
       }
       
@@ -167,9 +169,9 @@ const StudentModal = ({
     return Math.round(total / grades.length);
   };
 
-  const modalTitle = mode === "create" ? "Add New Student" : 
+const modalTitle = mode === "create" ? "Add New Student" : 
                    mode === "edit" ? "Edit Student" : 
-                   `${formData.firstName} ${formData.lastName}`;
+                   `${formData.firstName_c} ${formData.lastName_c}`;
 
   const footer = mode !== "view" ? (
     <>
@@ -220,71 +222,71 @@ const StudentModal = ({
         {activeTab === "profile" && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input
+<Input
                 label="First Name"
-                name="firstName"
-                value={formData.firstName}
+                name="firstName_c"
+                value={formData.firstName_c}
                 onChange={handleInputChange}
-                error={errors.firstName}
+                error={errors.firstName_c}
                 required
                 disabled={mode === "view"}
               />
               <Input
                 label="Last Name"
-                name="lastName"
-                value={formData.lastName}
+                name="lastName_c"
+                value={formData.lastName_c}
                 onChange={handleInputChange}
-                error={errors.lastName}
+                error={errors.lastName_c}
                 required
                 disabled={mode === "view"}
               />
               <Input
                 label="Student ID"
-                name="studentId"
-                value={formData.studentId}
+                name="studentId_c"
+                value={formData.studentId_c}
                 onChange={handleInputChange}
-                error={errors.studentId}
+                error={errors.studentId_c}
                 required
                 disabled={mode === "view"}
               />
               <Input
                 label="Date of Birth"
-                name="dateOfBirth"
+                name="dateOfBirth_c"
                 type="date"
-                value={formData.dateOfBirth}
+                value={formData.dateOfBirth_c}
                 onChange={handleInputChange}
                 disabled={mode === "view"}
               />
               <Input
                 label="Email"
-                name="email"
+                name="email_c"
                 type="email"
-                value={formData.email}
+                value={formData.email_c}
                 onChange={handleInputChange}
-                error={errors.email}
+                error={errors.email_c}
                 required
                 disabled={mode === "view"}
               />
               <Input
                 label="Phone"
-                name="phone"
-                value={formData.phone}
+                name="phone_c"
+                value={formData.phone_c}
                 onChange={handleInputChange}
                 disabled={mode === "view"}
               />
               <Input
                 label="Grade"
-                name="grade"
-                value={formData.grade}
+                name="grade_c"
+                value={formData.grade_c}
                 onChange={handleInputChange}
-                error={errors.grade}
+                error={errors.grade_c}
                 required
                 disabled={mode === "view"}
               />
               <Input
                 label="Section"
-                name="section"
-                value={formData.section}
+                name="section_c"
+                value={formData.section_c}
                 onChange={handleInputChange}
                 disabled={mode === "view"}
               />
@@ -292,16 +294,16 @@ const StudentModal = ({
             <div className="grid grid-cols-1 gap-6">
               <Input
                 label="Address"
-                name="address"
-                value={formData.address}
+                name="address_c"
+                value={formData.address_c}
                 onChange={handleInputChange}
                 disabled={mode === "view"}
               />
               {mode !== "create" && (
                 <Select
                   label="Status"
-                  name="status"
-                  value={formData.status}
+                  name="status_c"
+                  value={formData.status_c}
                   onChange={handleInputChange}
                   disabled={mode === "view"}
                 >
@@ -331,16 +333,16 @@ const StudentModal = ({
                   </div>
                 </div>
                 <div className="space-y-3">
-                  {grades.map((grade) => (
-                    <div key={grade.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+{grades.map((grade) => (
+                    <div key={grade.Id || grade.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                       <div>
-                        <p className="font-medium text-gray-900">{grade.subject}</p>
-                        <p className="text-sm text-gray-600">{grade.term} • {format(new Date(grade.date), "MMM dd, yyyy")}</p>
+                        <p className="font-medium text-gray-900">{grade.subject_c || grade.subject}</p>
+                        <p className="text-sm text-gray-600">{grade.term_c || grade.term} • {format(new Date(grade.date_c || grade.date), "MMM dd, yyyy")}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-lg font-bold text-gray-900">{grade.marks}/{grade.maxMarks}</p>
-                        <Badge variant={grade.percentage >= 80 ? "success" : grade.percentage >= 60 ? "warning" : "error"}>
-                          {grade.percentage}% ({grade.gradeLetter})
+                        <p className="text-lg font-bold text-gray-900">{grade.marks_c || grade.marks}/{grade.maxMarks_c || grade.maxMarks}</p>
+                        <Badge variant={(grade.percentage_c || grade.percentage) >= 80 ? "success" : (grade.percentage_c || grade.percentage) >= 60 ? "warning" : "error"}>
+                          {grade.percentage_c || grade.percentage}% ({grade.gradeLetter_c || grade.gradeLetter})
                         </Badge>
                       </div>
                     </div>
@@ -374,17 +376,17 @@ const StudentModal = ({
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-60 overflow-y-auto">
                   {attendance.map((record) => (
-                    <div key={record.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+<div key={record.Id || record.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <div>
                         <p className="text-sm font-medium text-gray-900">
-                          {format(new Date(record.date), "MMM dd, yyyy")}
+                          {format(new Date(record.date_c || record.date), "MMM dd, yyyy")}
                         </p>
-                        {record.remarks && (
-                          <p className="text-xs text-gray-600">{record.remarks}</p>
+                        {(record.remarks_c || record.remarks) && (
+                          <p className="text-xs text-gray-600">{record.remarks_c || record.remarks}</p>
                         )}
                       </div>
-                      <Badge variant={record.status === "Present" ? "success" : "error"}>
-                        {record.status}
+                      <Badge variant={(record.status_c || record.status) === "Present" ? "success" : "error"}>
+                        {record.status_c || record.status}
                       </Badge>
                     </div>
                   ))}
