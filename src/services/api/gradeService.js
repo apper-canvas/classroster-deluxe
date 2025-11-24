@@ -1,264 +1,90 @@
-import { getApperClient } from "@/services/apperClient";
-import { toast } from "react-toastify";
+import mockData from "../mockData/grades.json";
+
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 class GradeService {
   constructor() {
-    this.tableName = "grades_c";
+    this.data = [...mockData];
+    this.nextId = Math.max(...this.data.map(item => item.Id || item.id), 0) + 1;
   }
 
   async getAll() {
     try {
-      const apperClient = getApperClient();
-      if (!apperClient) {
-        throw new Error("ApperClient not initialized");
-      }
-
-      const params = {
-        fields: [
-          {"field": {"Name": "Name"}},
-          {"field": {"Name": "subject_c"}},
-          {"field": {"Name": "marks_c"}},
-          {"field": {"Name": "maxMarks_c"}},
-          {"field": {"Name": "percentage_c"}},
-          {"field": {"Name": "gradeLetter_c"}},
-          {"field": {"Name": "term_c"}},
-          {"field": {"Name": "date_c"}},
-          {"field": {"Name": "studentId_c"}}
-        ]
-      };
-
-      const response = await apperClient.fetchRecords(this.tableName, params);
-
-      if (!response.success) {
-        console.error(response.message);
-        toast.error(response.message);
-        return [];
-      }
-
-      if (!response?.data?.length) {
-        return [];
-      }
-
-      return response.data;
+      await delay(300);
+      return [...this.data];
     } catch (error) {
-      console.error("Error fetching grades:", error?.response?.data?.message || error);
+      console.error("Error fetching grades:", error?.message || error);
       return [];
     }
   }
 
   async getById(id) {
     try {
-      const apperClient = getApperClient();
-      if (!apperClient) {
-        throw new Error("ApperClient not initialized");
-      }
-
-      const params = {
-        fields: [
-          {"field": {"Name": "Name"}},
-          {"field": {"Name": "subject_c"}},
-          {"field": {"Name": "marks_c"}},
-          {"field": {"Name": "maxMarks_c"}},
-          {"field": {"Name": "percentage_c"}},
-          {"field": {"Name": "gradeLetter_c"}},
-          {"field": {"Name": "term_c"}},
-          {"field": {"Name": "date_c"}},
-          {"field": {"Name": "studentId_c"}}
-        ]
-      };
-
-      const response = await apperClient.getRecordById(this.tableName, parseInt(id), params);
-
-      if (!response?.data) {
-        return null;
-      }
-
-      return response.data;
+      await delay(300);
+      const item = this.data.find(g => (g.Id || g.id) === parseInt(id));
+      return item ? { ...item } : null;
     } catch (error) {
-      console.error(`Error fetching grade ${id}:`, error?.response?.data?.message || error);
+      console.error(`Error fetching grade ${id}:`, error?.message || error);
       return null;
     }
   }
 
   async getByStudentId(studentId) {
     try {
-      const apperClient = getApperClient();
-      if (!apperClient) {
-        throw new Error("ApperClient not initialized");
-      }
-
-      const params = {
-        fields: [
-          {"field": {"Name": "Name"}},
-          {"field": {"Name": "subject_c"}},
-          {"field": {"Name": "marks_c"}},
-          {"field": {"Name": "maxMarks_c"}},
-          {"field": {"Name": "percentage_c"}},
-          {"field": {"Name": "gradeLetter_c"}},
-          {"field": {"Name": "term_c"}},
-          {"field": {"Name": "date_c"}},
-          {"field": {"Name": "studentId_c"}}
-        ],
-        where: [{
-          "FieldName": "studentId_c",
-          "Operator": "EqualTo",
-          "Values": [parseInt(studentId)]
-        }],
-        orderBy: [{
-          "fieldName": "date_c",
-          "sorttype": "DESC"
-        }]
-      };
-
-      const response = await apperClient.fetchRecords(this.tableName, params);
-
-      if (!response.success) {
-        console.error(response.message);
-        return [];
-      }
-
-      return response.data || [];
+      await delay(300);
+      const filteredGrades = this.data.filter(g => (g.studentId_c || g.studentId) === parseInt(studentId));
+      return filteredGrades.map(g => ({ ...g }));
     } catch (error) {
-      console.error(`Error fetching grades for student ${studentId}:`, error?.response?.data?.message || error);
+      console.error(`Error fetching grades for student ${studentId}:`, error?.message || error);
       return [];
     }
   }
 
   async create(gradeData) {
     try {
-      const apperClient = getApperClient();
-      if (!apperClient) {
-        throw new Error("ApperClient not initialized");
-      }
-
-      const params = {
-        records: [{
-          Name: `${gradeData.subject_c} - ${gradeData.term_c}`,
-          subject_c: gradeData.subject_c,
-          marks_c: parseInt(gradeData.marks_c),
-          maxMarks_c: parseInt(gradeData.maxMarks_c),
-          percentage_c: gradeData.percentage_c,
-          gradeLetter_c: gradeData.gradeLetter_c,
-          term_c: gradeData.term_c,
-          date_c: gradeData.date_c,
-          studentId_c: parseInt(gradeData.studentId_c)
-        }]
+      await delay(300);
+      const newGrade = {
+        ...gradeData,
+        Id: this.nextId++,
+        Name: `${gradeData.studentId_c} - ${gradeData.subject_c} - ${gradeData.term_c}`
       };
-
-      const response = await apperClient.createRecord(this.tableName, params);
-
-      if (!response.success) {
-        console.error(response.message);
-        toast.error(response.message);
-        return null;
-      }
-
-      if (response.results) {
-        const successful = response.results.filter(r => r.success);
-        const failed = response.results.filter(r => !r.success);
-
-        if (failed.length > 0) {
-          console.error(`Failed to create ${failed.length} grade records:`, failed);
-          failed.forEach(record => {
-            record.errors?.forEach(error => toast.error(`${error.fieldLabel}: ${error}`));
-            if (record.message) toast.error(record.message);
-          });
-        }
-        return successful.length > 0 ? successful[0].data : null;
-      }
+      this.data.push(newGrade);
+      return { ...newGrade };
     } catch (error) {
-      console.error("Error creating grade:", error?.response?.data?.message || error);
+      console.error("Error creating grade:", error?.message || error);
       return null;
     }
   }
 
   async update(id, gradeData) {
     try {
-      const apperClient = getApperClient();
-      if (!apperClient) {
-        throw new Error("ApperClient not initialized");
-      }
-
-      const updateData = {
-        Id: parseInt(id)
+      await delay(300);
+      const index = this.data.findIndex(g => (g.Id || g.id) === parseInt(id));
+      if (index === -1) return null;
+      
+      const updated = {
+        ...this.data[index],
+        ...gradeData,
+        Name: `${gradeData.studentId_c} - ${gradeData.subject_c} - ${gradeData.term_c}`
       };
-
-      if (gradeData.subject_c && gradeData.term_c) {
-        updateData.Name = `${gradeData.subject_c} - ${gradeData.term_c}`;
-      }
-      if (gradeData.subject_c) updateData.subject_c = gradeData.subject_c;
-      if (gradeData.marks_c !== undefined) updateData.marks_c = parseInt(gradeData.marks_c);
-      if (gradeData.maxMarks_c !== undefined) updateData.maxMarks_c = parseInt(gradeData.maxMarks_c);
-      if (gradeData.percentage_c !== undefined) updateData.percentage_c = gradeData.percentage_c;
-      if (gradeData.gradeLetter_c) updateData.gradeLetter_c = gradeData.gradeLetter_c;
-      if (gradeData.term_c) updateData.term_c = gradeData.term_c;
-      if (gradeData.date_c) updateData.date_c = gradeData.date_c;
-      if (gradeData.studentId_c !== undefined) updateData.studentId_c = parseInt(gradeData.studentId_c);
-
-      const params = {
-        records: [updateData]
-      };
-
-      const response = await apperClient.updateRecord(this.tableName, params);
-
-      if (!response.success) {
-        console.error(response.message);
-        toast.error(response.message);
-        return null;
-      }
-
-      if (response.results) {
-        const successful = response.results.filter(r => r.success);
-        const failed = response.results.filter(r => !r.success);
-
-        if (failed.length > 0) {
-          console.error(`Failed to update ${failed.length} grade records:`, failed);
-          failed.forEach(record => {
-            record.errors?.forEach(error => toast.error(`${error.fieldLabel}: ${error}`));
-            if (record.message) toast.error(record.message);
-          });
-        }
-        return successful.length > 0 ? successful[0].data : null;
-      }
+      this.data[index] = updated;
+      return { ...updated };
     } catch (error) {
-      console.error("Error updating grade:", error?.response?.data?.message || error);
+      console.error("Error updating grade:", error?.message || error);
       return null;
     }
   }
 
   async delete(id) {
     try {
-      const apperClient = getApperClient();
-      if (!apperClient) {
-        throw new Error("ApperClient not initialized");
-      }
-
-      const params = {
-        RecordIds: [parseInt(id)]
-      };
-
-      const response = await apperClient.deleteRecord(this.tableName, params);
-
-      if (!response.success) {
-        console.error(response.message);
-        toast.error(response.message);
-        return false;
-      }
-
-      if (response.results) {
-        const successful = response.results.filter(r => r.success);
-        const failed = response.results.filter(r => !r.success);
-
-        if (failed.length > 0) {
-          console.error(`Failed to delete ${failed.length} grade records:`, failed);
-          failed.forEach(record => {
-            if (record.message) toast.error(record.message);
-          });
-        }
-        return successful.length === 1;
-      }
+      await delay(300);
+      const index = this.data.findIndex(g => (g.Id || g.id) === parseInt(id));
+      if (index === -1) return false;
+      
+      this.data.splice(index, 1);
+      return true;
     } catch (error) {
-      console.error("Error deleting grade:", error?.response?.data?.message || error);
+      console.error("Error deleting grade:", error?.message || error);
       return false;
     }
   }
