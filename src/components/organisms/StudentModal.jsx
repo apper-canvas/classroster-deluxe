@@ -29,9 +29,10 @@ const [formData, setFormData] = useState({
     phone_c: "",
     address_c: "",
     grade_c: "",
-section_c: "",
+    section_c: "",
     status_c: "Active",
-    Tags: ""
+    Tags: "",
+    CreatedOn: ""
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -42,8 +43,8 @@ const tabs = [
 
   useEffect(() => {
     if (student) {
-      setFormData({
-firstName_c: student.firstName_c || student.firstName || "",
+setFormData({
+        firstName_c: student.firstName_c || student.firstName || "",
         lastName_c: student.lastName_c || student.lastName || "",
         studentId_c: student.studentId_c || student.studentId || "",
         dateOfBirth_c: student.dateOfBirth_c || student.dateOfBirth || "",
@@ -52,16 +53,17 @@ firstName_c: student.firstName_c || student.firstName || "",
         address_c: student.address_c || student.address || "",
         grade_c: student.grade_c || student.grade || "",
         section_c: student.section_c || student.section || "",
-status_c: student.status_c || student.status || "Active",
-        Tags: student.Tags || ""
-});
+        status_c: student.status_c || student.status || "Active",
+        Tags: student.Tags || "",
+        CreatedOn: student.CreatedOn || ""
+      });
       
 if (mode === "view") {
         // Student data is already passed via props
       }
     } else {
 // Reset form for new student
-      setFormData({
+setFormData({
         firstName_c: "",
         lastName_c: "",
         studentId_c: "",
@@ -72,7 +74,8 @@ if (mode === "view") {
         grade_c: "",
         section_c: "",
         status_c: "Active",
-        Tags: ""
+        Tags: "",
+        CreatedOn: ""
       });
     }
     setActiveTab("profile");
@@ -273,7 +276,7 @@ const modalTitle = mode === "create" ? "Add New Student" :
                 placeholder="Type and press Enter to add tags (e.g., honor-roll, athlete, leadership)"
               />
             </div>
-            <div className="grid grid-cols-1 gap-6">
+<div className="grid grid-cols-1 gap-6">
               <Input
                 label="Address"
                 name="address_c"
@@ -281,6 +284,14 @@ const modalTitle = mode === "create" ? "Add New Student" :
                 onChange={handleInputChange}
                 disabled={mode === "view"}
               />
+              {mode !== "create" && formData.CreatedOn && (
+                <Input
+                  label="Created On"
+                  name="CreatedOn"
+                  value={formData.CreatedOn ? format(new Date(formData.CreatedOn), "MMM dd, yyyy 'at' h:mm a") : ""}
+                  disabled={true}
+                />
+              )}
               {mode !== "create" && (
                 <Select
                   label="Status"
