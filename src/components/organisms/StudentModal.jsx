@@ -28,8 +28,9 @@ const [formData, setFormData] = useState({
     phone_c: "",
     address_c: "",
     grade_c: "",
-    section_c: "",
-    status_c: "Active"
+section_c: "",
+    status_c: "Active",
+    Tags: ""
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -50,7 +51,8 @@ firstName_c: student.firstName_c || student.firstName || "",
         address_c: student.address_c || student.address || "",
         grade_c: student.grade_c || student.grade || "",
         section_c: student.section_c || student.section || "",
-        status_c: student.status_c || student.status || "Active"
+status_c: student.status_c || student.status || "Active",
+        Tags: student.Tags || ""
 });
       
 if (mode === "view") {
@@ -188,9 +190,9 @@ const modalTitle = mode === "create" ? "Add New Student" :
       {/* Tab Content */}
       <div className="space-y-6">
         {activeTab === "profile" && (
-          <div className="space-y-6">
+<div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-<Input
+              <Input
                 label="First Name"
                 name="firstName_c"
                 value={formData.firstName_c}
@@ -257,6 +259,16 @@ const modalTitle = mode === "create" ? "Add New Student" :
                 value={formData.section_c}
                 onChange={handleInputChange}
                 disabled={mode === "view"}
+              />
+            </div>
+            <div className="grid grid-cols-1 gap-6">
+              <Input
+                label="Tags"
+                name="Tags"
+                value={formData.Tags}
+                onChange={handleInputChange}
+                disabled={mode === "view"}
+                placeholder="Enter tags separated by commas (e.g., honor-roll, athlete, leadership)"
               />
             </div>
             <div className="grid grid-cols-1 gap-6">

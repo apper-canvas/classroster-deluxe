@@ -67,9 +67,9 @@ const filtered = students.filter(student => {
       return fullName.includes(search) ||
              (student.studentId_c || student.studentId || '').toLowerCase().includes(search) ||
              (student.email_c || student.email || '').toLowerCase().includes(search) ||
-             (student.grade_c || student.grade || '').toLowerCase().includes(search);
+             (student.grade_c || student.grade || '').toLowerCase().includes(search) ||
+             (student.Tags || '').toLowerCase().includes(search);
     });
-
     setFilteredStudents(filtered);
   };
 

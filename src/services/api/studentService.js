@@ -25,7 +25,8 @@ class StudentService {
           {"field": {"Name": "grade_c"}},
           {"field": {"Name": "section_c"}},
           {"field": {"Name": "status_c"}},
-          {"field": {"Name": "enrollmentDate_c"}}
+{"field": {"Name": "enrollmentDate_c"}},
+          {"field": {"Name": "Tags"}}
         ]
       };
 
@@ -68,7 +69,8 @@ class StudentService {
           {"field": {"Name": "grade_c"}},
           {"field": {"Name": "section_c"}},
           {"field": {"Name": "status_c"}},
-          {"field": {"Name": "enrollmentDate_c"}}
+{"field": {"Name": "enrollmentDate_c"}},
+          {"field": {"Name": "Tags"}}
         ]
       };
 
@@ -105,7 +107,8 @@ class StudentService {
           grade_c: studentData.grade_c,
           section_c: studentData.section_c || "",
           status_c: studentData.status_c || "Active",
-          enrollmentDate_c: studentData.enrollmentDate_c || new Date().toISOString().split('T')[0]
+enrollmentDate_c: studentData.enrollmentDate_c || new Date().toISOString().split('T')[0],
+          Tags: studentData.Tags || ""
         }]
       };
 
@@ -160,8 +163,8 @@ class StudentService {
       if (studentData.grade_c) updateData.grade_c = studentData.grade_c;
       if (studentData.section_c !== undefined) updateData.section_c = studentData.section_c;
       if (studentData.status_c) updateData.status_c = studentData.status_c;
-      if (studentData.enrollmentDate_c) updateData.enrollmentDate_c = studentData.enrollmentDate_c;
-
+if (studentData.enrollmentDate_c) updateData.enrollmentDate_c = studentData.enrollmentDate_c;
+      if (studentData.Tags !== undefined) updateData.Tags = studentData.Tags;
       const params = {
         records: [updateData]
       };
