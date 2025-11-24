@@ -7,6 +7,7 @@ import Loading from "@/components/ui/Loading";
 import Select from "@/components/atoms/Select";
 import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
+import TagInput from "@/components/atoms/TagInput";
 import Badge from "@/components/atoms/Badge";
 import Attendance from "@/components/pages/Attendance";
 import Modal from "@/components/molecules/Modal";
@@ -261,15 +262,15 @@ const modalTitle = mode === "create" ? "Add New Student" :
                 onChange={handleInputChange}
                 disabled={mode === "view"}
               />
-            </div>
+</div>
             <div className="grid grid-cols-1 gap-6">
-              <Input
+              <TagInput
                 label="Tags"
                 name="Tags"
                 value={formData.Tags}
                 onChange={handleInputChange}
                 disabled={mode === "view"}
-                placeholder="Enter tags separated by commas (e.g., honor-roll, athlete, leadership)"
+                placeholder="Type and press Enter to add tags (e.g., honor-roll, athlete, leadership)"
               />
             </div>
             <div className="grid grid-cols-1 gap-6">
