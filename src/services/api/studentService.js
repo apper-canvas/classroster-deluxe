@@ -5,7 +5,6 @@ class StudentService {
   constructor() {
     this.tableName = "students_c";
   }
-
   async getAll() {
     try {
       const apperClient = getApperClient();
