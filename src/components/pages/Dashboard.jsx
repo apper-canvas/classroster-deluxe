@@ -9,9 +9,9 @@ import ApperIcon from "@/components/ApperIcon";
 import Loading from "@/components/ui/Loading";
 import ErrorView from "@/components/ui/ErrorView";
 import Empty from "@/components/ui/Empty";
-import { studentService } from "@/services/api/studentService";
-import { gradeService } from "@/services/api/gradeService";
-import { attendanceService } from "@/services/api/attendanceService";
+import studentService from "@/services/api/studentService";
+import gradeService from "@/services/api/gradeService";
+import attendanceService from "@/services/api/attendanceService";
 import { format, isToday, subDays } from "date-fns";
 
 const Dashboard = () => {
